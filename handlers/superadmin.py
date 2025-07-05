@@ -21,7 +21,8 @@ async def add_admin(message: types.Message):
     sync_superadmin_to_users(message.from_user.id)
 
     if message.from_user.id not in SUPERADMINS:
-        return await message.answer("⛔️ Только для супер-админа")
+        return await message.answer("🚫 Fitur ini hanya untuk super-admin. Silakan tunggu sinyal berikutnya.")
+
 
     parts = message.text.strip().split()
     if len(parts) != 2 or not parts[1].isdigit():
@@ -46,7 +47,7 @@ async def remove_admin(message: types.Message):
     sync_superadmin_to_users(message.from_user.id)
 
     if message.from_user.id not in SUPERADMINS:
-        return await message.answer("⛔️ Только для супер-админа")
+        return await message.answer("🚫 Fitur ini hanya untuk super-admin. Silakan tunggu sinyal berikutnya.")
 
     parts = message.text.strip().split()
     if len(parts) != 2 or not parts[1].isdigit():

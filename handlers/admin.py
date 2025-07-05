@@ -6,6 +6,7 @@ from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 from utils.send_signal import save_signal_for_later
 from utils.send_signal import send_signal_to_users
 from config import SUPERADMINS, ADMINS
+import os
 import json
 
 router = Router()
@@ -24,7 +25,8 @@ class SignalForm(StatesGroup):
 async def start_signal(message: types.Message, state: FSMContext):
     user_id = message.from_user.id
     if user_id not in ADMINS and user_id not in SUPERADMINS:
-        return await message.answer("⛔️ Нет доступа.")
+        return await message.answer("❌ Anda bukan admin. Mohon tunggu sinyal selanjutnya dari bot ini.")
+
     await state.set_state(SignalForm.ticker)
     await message.answer("🔹 Введи тикер (например: SEIUSDT)")
 
@@ -136,3 +138,52 @@ async def save_delayed_signal(message: types.Message, state: FSMContext):
         await state.clear()
     else:
         await message.answer("⚠️ Неверный формат времени. Введи в формате HH:MM (например: 16:30)")
+
+@router.message(Command("scheduled"))
+async def view_scheduled(message: types.Message):
+    user_id = str(message.from_user.id)
+    with open("database/users.json", "r", encoding="utf-8") as f:
+        users = json.load(f)
+    if user_id not in users or users[user_id]["role"] not in ["admin", "superadmin"]:
+        return await message.answer("❌ Anda bukan admin. Mohon tunggu sinyal selanjutnya dari bot ini.")
+
+    if not os.path.exists("database/signals.json"):
+        return await message.answer("📭 Нет отложенных сигналов.")
+
+    with open("database/signals.json", "r", encoding="utf-8") as f:
+        signals = json.load(f)
+
+    if not signals:
+        return await message.answer("📭 Нет отложенных сигналов.")
+
+    text = "📝 <b>Список отложенных сигналов:</b>\n\n"
+    for s in signals:
+        text += f"🆔 <code>{s['id']}</code>\n🕒 {s['send_at']}\n📦 {s['text'][:40]}...\n\n"
+
+    await message.answer(text, parse_mode="HTML")
+
+
+@router.message(Command("deletesignal"))
+async def delete_scheduled(message: types.Message):
+    user_id = str(message.from_user.id)
+    with open("database/users.json", "r", encoding="utf-8") as f:
+        users = json.load(f)
+    if user_id not in users or users[user_id]["role"] not in ["admin", "superadmin"]:
+        return await message.answer("❌ Anda bukan admin. Mohon tunggu sinyal selanjutnya dari bot ini.")
+
+    parts = message.text.strip().split()
+    if len(parts) != 2:
+        return await message.answer("⚠ Используй: /deletesignal <id>")
+
+    signal_id = parts[1]
+
+    with open("database/signals.json", "r+", encoding="utf-8") as f:
+        signals = json.load(f)
+        updated = [s for s in signals if s["id"] != signal_id]
+        if len(signals) == len(updated):
+            return await message.answer("⚠ Сигнал с таким ID не найден.")
+        f.seek(0)
+        json.dump(updated, f, indent=2)
+        f.truncate()
+
+    await message.answer(f"🗑 Сигнал с ID <code>{signal_id}</code> удалён.", parse_mode="HTML")

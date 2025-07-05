@@ -1,6 +1,7 @@
 import json
 from datetime import datetime
 import pytz
+import uuid
 
 async def send_signal_to_users(bot, signal_data):
     from config import SUPERADMINS, ADMINS
@@ -39,6 +40,7 @@ async def save_signal_for_later(data, time_str):
             target_time = target_time.replace(day=now.day + 1)
 
         data["send_at"] = target_time.strftime("%Y-%m-%d %H:%M")
+        data["id"] = str(uuid.uuid4())
 
         with open("database/signals.json", "r+", encoding="utf-8") as f:
             signals = json.load(f)
