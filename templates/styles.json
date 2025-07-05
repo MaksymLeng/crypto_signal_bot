@@ -1,0 +1,22 @@
+{
+  "premium": {
+    "title": "📈 Sinyal Masuk!",
+    "body": [
+      "💰 Pair: {ticker}",
+      "📊 Posisi: {position}",
+      "🎯 Take Profit: {take}",
+      "🛑 Risiko Maks: {risk}%"
+    ],
+    "footer": "⚡️Segera pantau pasar & atur posisi kamu dengan bijak!"
+  },
+  "pumping": {
+    "title": "🚨 SIGNAL PANAS!",
+    "body": [
+      "📍 {ticker}",
+      "📈 {position}",
+      "🎯 Target: {take}",
+      "❗️Cut Loss: RM {risk}%"
+    ],
+    "footer": "💬 Ambil posisi cepat sebelum terlambat!"
+  }
+}
