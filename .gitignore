@@ -1,0 +1,26 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.so
+
+# Environments
+.env
+*.env
+
+# IDE
+.vscode/
+.idea/
+
+# Logs
+*.log
+
+# Databases / runtime
+database/users.json
+database/signals.json
+
+# Cache & others
+*.db
+*.sqlite3
+.DS_Store
