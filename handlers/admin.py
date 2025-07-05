@@ -140,10 +140,13 @@ async def save_delayed_signal(message: types.Message, state: FSMContext):
         await message.answer("⚠️ Неверный формат времени. Введи в формате HH:MM (например: 16:30)")
 
 @router.message(Command("scheduled"))
+@router.message(Command("scheduled"))
 async def view_scheduled(message: types.Message):
     user_id = str(message.from_user.id)
+
     with open("database/users.json", "r", encoding="utf-8") as f:
         users = json.load(f)
+
     if user_id not in users or users[user_id]["role"] not in ["admin", "superadmin"]:
         return await message.answer("❌ Anda bukan admin. Mohon tunggu sinyal selanjutnya dari bot ini.")
 
@@ -158,32 +161,54 @@ async def view_scheduled(message: types.Message):
 
     text = "📝 <b>Список отложенных сигналов:</b>\n\n"
     for s in signals:
-        text += f"🆔 <code>{s['id']}</code>\n🕒 {s['send_at']}\n📦 {s['text'][:40]}...\n\n"
+        try:
+            text += (
+                f"🆔 <code>{s.get('id', '[нет id]')}</code>\n"
+                f"🕒 {s.get('send_at', '[нет времени]')}\n"
+                f"📊 {s.get('ticker', '...')} ({s.get('position', '?')}) | 🎯 Take: {s.get('take', '?')} | 🔥 Risk: {s.get('risk', '?')}%\n"
+                f"🎨 Стиль: {s.get('style', '-')}\n\n"
+            )
+        except Exception as e:
+            print(f"[❗] Ошибка сигнала: {s} → {e}")
 
     await message.answer(text, parse_mode="HTML")
+
 
 
 @router.message(Command("deletesignal"))
 async def delete_scheduled(message: types.Message):
     user_id = str(message.from_user.id)
+
     with open("database/users.json", "r", encoding="utf-8") as f:
         users = json.load(f)
+
     if user_id not in users or users[user_id]["role"] not in ["admin", "superadmin"]:
         return await message.answer("❌ Anda bukan admin. Mohon tunggu sinyal selanjutnya dari bot ini.")
 
     parts = message.text.strip().split()
     if len(parts) != 2:
-        return await message.answer("⚠ Используй: /deletesignal <id>")
+        return await message.answer(
+            "⚠ Чтобы удалить сигнал, укажи его ID.\n\n"
+            "Пример: <code>/deletesignal 2391fc9a</code>\n"
+            "👉 Посмотри список ID с помощью команды <b>/scheduled</b>.",
+            parse_mode="HTML"
+        )
 
     signal_id = parts[1]
 
-    with open("database/signals.json", "r+", encoding="utf-8") as f:
-        signals = json.load(f)
-        updated = [s for s in signals if s["id"] != signal_id]
-        if len(signals) == len(updated):
-            return await message.answer("⚠ Сигнал с таким ID не найден.")
-        f.seek(0)
-        json.dump(updated, f, indent=2)
-        f.truncate()
+    try:
+        with open("database/signals.json", "r+", encoding="utf-8") as f:
+            signals = json.load(f)
+            updated = [s for s in signals if s["id"] != signal_id]
 
-    await message.answer(f"🗑 Сигнал с ID <code>{signal_id}</code> удалён.", parse_mode="HTML")
+            if len(signals) == len(updated):
+                return await message.answer("⚠ Сигнал с таким ID не найден.")
+
+            f.seek(0)
+            json.dump(updated, f, indent=2)
+            f.truncate()
+
+        await message.answer(f"🗑 Сигнал с ID <code>{signal_id}</code> удалён.", parse_mode="HTML")
+
+    except Exception as e:
+        await message.answer(f"❌ Ошибка при удалении: {e}")

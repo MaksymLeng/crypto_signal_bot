@@ -49,6 +49,9 @@ async def start_handler(message: types.Message):
             "/addadmin user_id — добавить админа\n"
             "/removeadmin user_id — убрать админа\n"
             "/listadmins — список админов\n"
+            "/scheduled — список отложенных сигналов\n"
+            "/deletesignal id — удалить отложенный сигнал\n"
             "/start — перезапуск панели"
         )
+
 

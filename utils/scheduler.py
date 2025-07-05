@@ -5,9 +5,13 @@ import pytz
 from aiogram import Bot
 from config import TIMEZONE
 
+recovered_once = False  # чтобы логика восстановления сработала один раз
+
+
 async def schedule_signal(bot: Bot, signal: dict, send_time: datetime):
     delay = (send_time - datetime.now(pytz.timezone(TIMEZONE))).total_seconds()
-    await asyncio.sleep(delay)
+    if delay > 0:
+        await asyncio.sleep(delay)
 
     try:
         with open("templates/styles.json", "r", encoding="utf-8") as f:
@@ -36,6 +40,7 @@ async def schedule_signal(bot: Bot, signal: dict, send_time: datetime):
 
 
 async def check_scheduled_signals(bot: Bot):
+    global recovered_once
     while True:
         try:
             with open("database/signals.json", "r+", encoding="utf-8") as f:
@@ -44,7 +49,6 @@ async def check_scheduled_signals(bot: Bot):
             now = datetime.now(pytz.timezone(TIMEZONE))
             to_send = []
             remaining = []
-
             future_signals = []
 
             for signal in signals:
@@ -56,8 +60,8 @@ async def check_scheduled_signals(bot: Bot):
                         to_send.append(signal)
                     else:
                         future_signals.append(signal)
-                        # Добавим в будущий планировщик заново
-                        asyncio.create_task(schedule_signal(bot, signal, send_time))
+                        if not recovered_once:
+                            asyncio.create_task(schedule_signal(bot, signal, send_time))
                 except Exception as e:
                     print(f"[Scheduler Parsing Error] Сигнал пропущен: {e}")
 
@@ -85,13 +89,15 @@ async def check_scheduled_signals(bot: Bot):
                                 await bot.send_message(uid, message_text)
                             except Exception as e:
                                 print(f"Ошибка при отправке {uid}: {e}")
+            # Сохраняем только будущие сигналы
+            with open("database/signals.json", "w", encoding="utf-8") as f:
+                json.dump(future_signals, f, indent=2)
 
-                # Обновляем signals.json (оставляем только неотправленные)
-                with open("database/signals.json", "w", encoding="utf-8") as f:
-                    json.dump(remaining, f, indent=2)
-                    print(f"✅ Восстановлено {len(future_signals)} отложенных сигналов")
+            if not recovered_once:
+                print(f"🕒 Планировщик: восстановлено {len(future_signals)} сигналов")
+                recovered_once = True
 
         except Exception as e:
             print(f"[Scheduler Error] {e}")
 
-        await asyncio.sleep(30)  # интервал проверки
+        await asyncio.sleep(30)

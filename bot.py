@@ -38,6 +38,7 @@ async def main():
         await bot.delete_webhook(drop_pending_updates=True)
         print("🔁 Webhook удалён")
 
+        print("🔄 Запуск планировщика и восстановление отложенных сигналов...")
         asyncio.create_task(check_scheduled_signals(bot))
         print("🕒 Планировщик запущен")
 
