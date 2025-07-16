@@ -1,3 +1,5 @@
+import os
+
 from aiogram import Router, types
 from aiogram.filters import Command
 import json
@@ -30,10 +32,13 @@ async def start_handler(message: types.Message):
 
     # Приветствие по роли
     if role == "user":
-        await message.answer_photo(
-            photo=FSInputFile("assets/tradePower.jpg"),
-            caption="👋 Selamat datang di bot sinyal dari kanal TradePower!"
-        )
+        if os.path.exists("assets/tradePower.jpg"):
+            await message.answer_photo(
+                photo=FSInputFile("assets/tradePower.jpg"),
+                caption="👋 Welcome to the signal bot from the TradePower channel!"
+            )
+        else:
+            await message.answer("👋 Welcome to the signal bot from the TradePower channel!")
     elif role == "admin":
         await message.answer(
             "🛠 Вы вошли как админ.\n\n"

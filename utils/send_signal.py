@@ -6,20 +6,25 @@ import uuid
 async def send_signal_to_users(bot, signal_data):
     from config import SUPERADMINS, ADMINS
 
-    with open("templates/styles.json", "r", encoding="utf-8") as f:
-        styles = json.load(f)
+    # Если кастомный текст — просто отправляем его
+    if "custom_text" in signal_data:
+        message_text = signal_data["custom_text"]
+    else:
+        with open("templates/styles.json", "r", encoding="utf-8") as f:
+            styles = json.load(f)
 
-    style = styles[signal_data["style"]]
+        style = styles[signal_data["style"]]
 
-    message_text = f"{style['title']}\n\n" + "\n".join([
-        line.format(
-            ticker=signal_data["ticker"],
-            position=signal_data["position"],
-            take=signal_data["take"],
-            risk=signal_data["risk"]
-        ) for line in style["body"]
-    ]) + "\n\n" + style["footer"]
+        message_text = f"{style['title']}\n\n" + "\n".join([
+            line.format(
+                ticker=signal_data["ticker"],
+                position=signal_data["position"],
+                take=signal_data["take"],
+                risk=signal_data["risk"]
+            ) for line in style["body"]
+        ]) + "\n\n" + style["footer"]
 
+    # Читаем юзеров и отправляем
     with open("database/users.json", "r", encoding="utf-8") as f:
         users = json.load(f)
 
