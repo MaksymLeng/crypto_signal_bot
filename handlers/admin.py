@@ -91,6 +91,13 @@ async def choose_style(callback: types.CallbackQuery, state: FSMContext):
 
 @router.callback_query(F.data == "back_to_style")
 async def back_to_style(callback: types.CallbackQuery, state: FSMContext):
+    data = await state.get_data()
+
+    # Убираем флаг уже-отправленного
+    if data.get("already_sent"):
+        data.pop("already_sent")
+        await state.set_data(data)
+
     await state.set_state(SignalForm.style)
     keyboard = InlineKeyboardMarkup(inline_keyboard=[
         [InlineKeyboardButton(text="💎 Премиум", callback_data="style_premium")],

@@ -1,22 +1,23 @@
 {
   "premium": {
-    "title": "📈 Sinyal Masuk!",
+    "title": "📈 Entry Signal!",
     "body": [
       "💰 Pair: {ticker}",
-      "📊 Posisi: {position}",
+      "📊 Position: {position}",
       "🎯 Take Profit: {take}",
-      "🛑 Risiko Maks: {risk}%"
+      "🛑 Max Risk: {risk}%"
     ],
-    "footer": "⚡️Segera pantau pasar & atur posisi kamu dengan bijak!"
+    "footer": "⚡️Monitor the market immediately & manage your position wisely!"
   },
   "pumping": {
-    "title": "🚨 SIGNAL PANAS!",
+    "title": "🚨 HOT SIGNAL!",
     "body": [
       "📍 {ticker}",
       "📈 {position}",
       "🎯 Target: {take}",
       "❗️Cut Loss: RM {risk}%"
     ],
-    "footer": "💬 Ambil posisi cepat sebelum terlambat!"
+    "footer": "💬 Enter the position quickly before it's too late!"
   }
 }
+
